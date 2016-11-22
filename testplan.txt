@@ -1,0 +1,166 @@
+1) Makefile commands:
+	"make server"	Use this on iLabs to create server.exe
+	"make client"	Use this on iLabs to create client.exe
+
+	"make s"	Use this on Cygwin, cygwin doesn't understand -pthread
+	"make c"	Use this on Cygwin, cygwin doesn't understand -pthread
+
+	client.exe only needs client.c and client.h
+	all other files belong to server.exe
+
+2) printing the bank:
+	The server process starts up a new thread to print the entire bank 
+	every 20 seconds.  This is even before the server starts accepting
+	connections. This is what the bank looks like in the beginning:
+
+		Printing bank ... 0 open accounts
+		NUM     ACCOUNT NAME    BALANCE IN USE?
+		0       <empty>         <0>             <N/A>
+		1       <empty>         <0>             <N/A>
+		2       <empty>         <0>             <N/A>
+		3       <empty>         <0>             <N/A>
+		4       <empty>         <0>             <N/A>
+		5       <empty>         <0>             <N/A>
+		6       <empty>         <0>             <N/A>
+		7       <empty>         <0>             <N/A>
+		8       <empty>         <0>             <N/A>
+		9       <empty>         <0>             <N/A>
+		10      <empty>         <0>             <N/A>
+		11      <empty>         <0>             <N/A>
+		12      <empty>         <0>             <N/A>
+		13      <empty>         <0>             <N/A>
+		14      <empty>         <0>             <N/A>
+		15      <empty>         <0>             <N/A>
+		16      <empty>         <0>             <N/A>
+		17      <empty>         <0>             <N/A>
+		18      <empty>         <0>             <N/A>
+		19      <empty>         <0>             <N/A>
+
+	As connections occur and clients start creating and adjusting
+	accounts, the bank will change.
+
+3) Client interface:
+	When the client process connects to the server socket, the 
+	first thing the server does to send over a welcome message:
+
+		Welcome to the Desert Sands Banking Platform
+		What would you like to do today?
+		Would you like to
+		        [open] a new account?
+		        [start] a session with a preexisting account?
+
+	The client process creates a thread read from the server, and
+	this welcome message is the first thing read by this new thread
+	and displayed on the client-user's screen.
+
+	All the client-user's entered commands are read by the client
+	process's original thread at the rate of command every two 
+	seconds.  The server's interface thread prints out on its screen 
+	every command as it is received, so it is possible to check the
+	rate the client process sends its commands.
+
+		USER SCREEN:			SERVER SCREEN:
+		open cecil			INCOMING MESSAGE: [open]
+		credit 20
+		open carlos			INCOMING MESSAGE: [credit]
+						INCOMING MESSAGE: [open]
+		You are currently in 
+		     a customer session
+		Invalid command
+		start oldwomanjosie		INCOMING MESSAGE: [start]
+		Starting session with 
+		     preexisting account 
+		     failed
+
+	The server will complain to the user about invalid commands,
+	such as trying to open a new account or start a session with
+	a preexisting account.
+	
+		finish				INCOMING MESSAGE: [finish]
+		open carlos			INCOMING MESSAGE: [open]
+		credit 70			INCOMING MESSAGE: [credit]
+		balance				INCOMING MESSAGE: [balance]
+		BALANCE: 70.000000
+		debit 20
+		balance				INCOMING MESSAGE: [debit]
+		finish				INCOMING MESSAGE: [balance]
+		BALANCE: 50.000000
+		open oldwomanjosie		INCOMING MESSAGE: [finish]
+		debit 60
+		credit 20			INCOMING MESSAGE: [open]
+		finish				INCOMING MESSAGE: [debit]
+		Invalid transaction: not 
+		     enough funds
+
+	The server will also notify the user if the user is attempting
+	to debit more money than the account holds.
+
+						INCOMING MESSAGE: [credit]
+						INCOMING MESSAGE: [finish]
+						INCOMING MESSAGE: [start]
+
+		start cecil
+		balance
+		BALANCE: 20.000000
+		debit 20
+		balance
+		BALANCE: 0.000000
+		close
+		finish
+		You are not currently in a customer session
+		close
+		You are not currently in a customer session
+		exit
+
+	Note: I added another command "close" to close out an account.
+
+4) Printing the bank (again);
+
+	Throughout the above interactions, the bank continues to 
+	print a full accounting every 20 seconds:
+
+Printing bank ... 2 open accounts
+NUM     ACCOUNT NAME    BALANCE IN USE?
+0       cecil   20.000000
+1       carlos  50.000000
+2       <empty>         <0>             <N/A>
+3       <empty>         <0>             <N/A>
+4       <empty>         <0>             <N/A>
+5       <empty>         <0>             <N/A>
+6       <empty>         <0>             <N/A>
+7       <empty>         <0>             <N/A>
+8       <empty>         <0>             <N/A>
+9       <empty>         <0>             <N/A>
+10      <empty>         <0>             <N/A>
+11      <empty>         <0>             <N/A>
+12      <empty>         <0>             <N/A>
+13      <empty>         <0>             <N/A>
+14      <empty>         <0>             <N/A>
+15      <empty>         <0>             <N/A>
+16      <empty>         <0>             <N/A>
+17      <empty>         <0>             <N/A>
+18      <empty>         <0>             <N/A>
+19      <empty>         <0>             <N/A>
+
+Printing bank ... 2 open accounts
+NUM     ACCOUNT NAME    BALANCE IN USE?
+0       <empty>         <0>             <N/A>
+1       carlos  50.000000
+2       oldwomanjosie   20.000000
+3       <empty>         <0>             <N/A>
+4       <empty>         <0>             <N/A>
+5       <empty>         <0>             <N/A>
+6       <empty>         <0>             <N/A>
+7       <empty>         <0>             <N/A>
+8       <empty>         <0>             <N/A>
+9       <empty>         <0>             <N/A>
+10      <empty>         <0>             <N/A>
+11      <empty>         <0>             <N/A>
+12      <empty>         <0>             <N/A>
+13      <empty>         <0>             <N/A>
+14      <empty>         <0>             <N/A>
+15      <empty>         <0>             <N/A>
+16      <empty>         <0>             <N/A>
+17      <empty>         <0>             <N/A>
+18      <empty>         <0>             <N/A>
+19      <empty>         <0>             <N/A>
