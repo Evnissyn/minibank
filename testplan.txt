@@ -9,6 +9,9 @@
 	all other files belong to server.exe
 
 2) printing the bank:
+
+	Start the server process with the command './server.exe'
+	
 	The server process starts up a new thread to print the entire bank 
 	every 20 seconds.  This is even before the server starts accepting
 	connections. This is what the bank looks like in the beginning:
@@ -40,6 +43,11 @@
 	accounts, the bank will change.
 
 3) Client interface:
+	
+	Start the client process with './client.exe <name of server computer>'
+	If both client and server is run on the same computer, 
+		start client process with './client.exe localhost'
+
 	When the client process connects to the server socket, the 
 	first thing the server does to send over a welcome message:
 
@@ -49,12 +57,20 @@
 		        [open] a new account?
 		        [start] a session with a preexisting account?
 
-	The client process creates a thread read from the server, and
-	this welcome message is the first thing read by this new thread
+	Available commands for the client:
+		open <name of account>		// open a new account
+		close <name of account>		// close out an account
+		start <name of account>		// start a session with an account
+		finish <name of account>	// finish session with an account
+		credit <float>				// add money to the account
+		debit <float>				// take money out of the account
+
+	The client process creates a thread to read from the server.
+	This welcome message is the first thing read by this new thread
 	and displayed on the client-user's screen.
 
 	All the client-user's entered commands are read by the client
-	process's original thread at the rate of command every two 
+	process's original thread at the rate of one command every two 
 	seconds.  The server's interface thread prints out on its screen 
 	every command as it is received, so it is possible to check the
 	rate the client process sends its commands.
@@ -111,8 +127,6 @@
 		close
 		You are not currently in a customer session
 		exit
-
-	Note: I added another command "close" to close out an account.
 
 4) Printing the bank (again);
 
